@@ -14,6 +14,8 @@ def parseCommandLineArgs():
                         action="store_true", help="will enable test mode")
     parser.add_argument("-v", "--verbose",
                         action="store_true", help="will enable print statements")
+    parser.add_argument("-m", "--mac",
+                        action="store_true", help="will run on mac")
     return parser.parse_args()
 
 def runTest():
@@ -72,8 +74,83 @@ class Melody():
         """returns the note before the current note"""
         self.current_note = (self.current_note - 1)
         if self.current_note < 0:
-            self.current_note = self.length
+            self.current_note = self.length-1
         return self.notes[self.current_note]
+
+    def firstNote(self):
+        """ plays the first note in the melody"""
+        self.current_note = 0
+        return self.notes[self.current_note]
+
+    def repeatNote(self):
+        """ plays the same note that was just played"""
+        return self.notes[self.current_note]
+
+def melodyTutorial():
+    # this is a short example of how to use the Melody class
+    # create some melodies (check out the class above)
+    # the numbers correspond to the note numbers there can be any number
+    melody1 = Melody([0, 2, 3, 1, 0, 5, 9, 4,])
+    # you can create as many instance of melody as you want!
+    # melody2 = Melody([1, 5, 3, 6, 0, 2, 1, 0, 0, 1])
+    # to start playing our melody call the firstNote() method
+    print("lets explore the melody1 class we made")
+    note = melody1.firstNote()
+    print("note: ", note)
+    # then send the note to your instrument over OSC
+    client.send_message("/noteOn", [note, 1.0]) # the 1.0 is the velocity of our note
+    time.sleep(0.5)# wait for a half a second before continueing
+    # now lets play through the rest of the melody
+    for i in range(0, melody1.length):
+        note = melody1.nextNote()
+        print("note: ", note)
+        client.send_message("/noteOn", [note, 1.0])
+        time.sleep(0.5)
+
+    time.sleep(2.0)
+
+    print("lets randomize our MANDOLIN's parameters and then play the melody in reverse")
+    client.send_message("/parameters", [random.random(), random.random(), random.random(), random.random()])
+    for i in range(0, melody1.length):
+        note = melody1.lastNote()
+        print("note: ", note)
+        client.send_message("/noteOn", [note, 1.0])
+        time.sleep(0.5)
+
+    time.sleep(2.0)
+
+    print("lets change our instrument to the MODALBAR and randomize the parameters")
+    client.send_message("/instrument", MODALBAR)
+    client.send_message("/parameters", [random.random(), random.random(), random.random(), random.random()])
+    # we can play each note twice
+    for i in range(0, melody1.length):
+        note = melody1.nextNote()
+        print("note: ", note)
+        client.send_message("/noteOn", [note, 1.0])
+        time.sleep(0.25)
+        note = melody1.repeatNote()
+        print("note: ", note)
+        client.send_message("/noteOn", [note, 1.0])
+        time.sleep(0.25)
+
+    time.sleep(2.0)
+
+    print("lets randomize our parameters again and then play random notes from the melody")
+    client.send_message("/parameters", [random.random(), random.random(), random.random(), random.random()])
+    for i in range(0, melody1.length*4):
+        note = melody1.notes[random.randint(0, melody1.length-1)]
+        print("note: ", note)
+        client.send_message("/noteOn", [note, 1.0])
+        time.sleep(0.33)
+
+    print("now lets switch to the HARMONIC mode and play all the available chords")
+    play_mode = HARMONIC
+    client.send_message("/playMode", play_mode)
+    for i in range(0, 9):
+        chord = i
+        print("chord: ", chord)
+        client.send_message("/noteOn", [chord, 1.0])
+        time.sleep(0.5)
 
 
 # the code within this if statement is what is run when the program is called
@@ -83,13 +160,13 @@ class Melody():
 if __name__ == "__main__":
     # ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     ########### DO NOT MODIFY THE CODE BETWEEN THESE LINES #################
+    args = parseCommandLineArgs()
     ip = "127.0.0.1"# the IP of whatever computer this program is running on
     # do not change this, it is required for OSC communication between
 
     # this program and python
     port = 6449
     client = udp_client.SimpleUDPClient(ip, port)
-    args = parseCommandLineArgs()
 
     # these allow us to use MANDOLIN instead of 0 when sending /instrument messages
     MANDOLIN = 0 # variables which are all-caps usually signify constants
@@ -128,60 +205,5 @@ if __name__ == "__main__":
     # ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     ########### WRITE YOUR CODE BELOW THIS LINE ############################
 
-
-    # this is a short example of how to use the Melody class
-    # create some melodies (check out the class above)
-    # the numbers correspond to the note numbers there can be any number
-    melody1 = Melody([0, 2, 3, 1, 0, 5, 9, 4,])
-    melody2 = Melody([1, 5, 3, 6, 0, 2, 1, 0, 0, 1j])
-    # to start playing our melody call the firstNote() method
-    note = melody1.firstNote()
-    print("lets explore the melody1 class we made")
-    # then send the note to your instrument over OSC
-    client.send_message("/noteOn", [note, 1.0]) # the 1.0 is the velocity of our note
-    time.sleep(0.5)# wait for a half a second before continueing
-    # now lets play through the rest of the melody
-    for i in range(0, melody1.length):
-        note = melody1.nextNote()
-        client.send_message("/noteOn", [note, 1.0])
-        time.sleep(0.5)
-
-    time.sleep(2.0)
-
-    print("lets randomize our MANDOLIN's parameters and then play the melody in reverse")
-    client.send_message("/parameters", [random.random(), random.random(), random.random(), random.random()])
-    for i in range(0, melody1.length):
-        note = melody1.lastNote()
-        client.send_message("/noteOn", [note, 1.0])
-        time.sleep(0.5)
-
-    time.sleep(2.0)
-
-    print("lets change our instrument to the MODALBAR and randomize the parameters")
-    client.send_message("/instrument", MODALBAR)
-    client.send_message("/parameters", [random.random(), random.random(), random.random(), random.random()])
-    # we can play each note twice
-    for i in range(0, melody1.length):
-        note = melody1.nextNote()
-        client.send_message("/noteOn", [note, 1.0])
-        time.sleep(0.25)
-        note = melody1.repeatNote()
-        client.send_message("/noteOn", [note, 1.0])
-        time.sleep(0.25)
-
-    time.sleep(2.0)
-
-    print("lets randomize our parameters again and then play random notes from the melody")
-    client.send_message("/parameters", [random.random(), random.random(), random.random(), random.random()])
-    for i in range(0, melody1.length*4):
-        note = melody1.notes[random.randint(0, melody1.length-1)]
-        client.send_message("/noteOn", [note, 1.0])
-        time.sleep(0.33)
-
-    print("now lets switch to the HARMONIC mode and play all the available chords")
-    play_mode = HARMONIC
-    client.send_message("/playMode", play_mode)
-    for i in range(0, 9):
-        note = i
-        client.send_message("/noteOn", [note, 1.0])
-        time.sleep(0.5)
+    # comment out the line below by adding # before it after you understand how to use the Melody Class
+    melodyTutorial()

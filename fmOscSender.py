@@ -123,7 +123,7 @@ if __name__ == "__main__":
     # create some melodies (check out the class above)
     # the numbers correspond to the note numbers there can be any number
     melody1 = Melody([0, 2, 3, 1, 0, 5, 9, 8])# add, remove, or change the numbers in me
-    melody2 = Melody([1, 5, 3, 6, 0, 2, 1, 0, 0, 1j])
+    melody2 = Melody([1, 5, 3, 6, 8, 0, 2, 1, 0, 0, 1j])
     # to start playing our melody call the firstNote() method
     note = melody1.firstNote()
     print(" lets play through our melody1 class")

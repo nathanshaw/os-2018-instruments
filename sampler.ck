@@ -3,7 +3,6 @@ SndBuf kick => master_gain => dac;
 SndBuf click => master_gain => dac;
 SndBuf hh => master_gain => dac;
 
-
 string kickFilenames[3];
 me.dir() + "/samples/kick_01.wav" =>  kickFilenames[0];
 me.dir() + "/samples/kick_02.wav" =>  kickFilenames[1];
